@@ -2,6 +2,18 @@ package Corregido;
 
 public class PedidoImpresion {
     
-    ImpresoraTermica imp;
+    private Impresora impresora;
+
+    PedidoImpresion(Impresora impresora) {
+
+        this.impresora = impresora;
+
+    }
+
+    public void impresion(String recibo) {
+
+        impresora.imprimir(recibo);
+
+    }
 
 }

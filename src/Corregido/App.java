@@ -7,6 +7,10 @@ public class App {
 
         Pedido pedido = new Pedido();
         PedidoRepositorio repo = new PedidoRepositorio();
+        GenerarRecibo generador = new GenerarRecibo();
+        String recibo = generador.generar(pedido);
+        ImpresoraTermica impt = new ImpresoraTermica();
+        PedidoImpresion impresion = new PedidoImpresion(impt);
         pedido.setCliente("Ana");
         pedido.setTipoCliente("VIP");
         pedido.agregarPlato("Bandeja paisa", 28000);
@@ -14,7 +18,7 @@ public class App {
 
         System.out.println("Total: " + pedido.calcularTotal());
         repo.guardar();
-        pedido.imprimirRecibo();
+        impresion.impresion(recibo);
         pedido.enviarCorreoConfirmacion();
 
         // El código cliente confía en que TODO MetodoPago se puede cobrar igual...
