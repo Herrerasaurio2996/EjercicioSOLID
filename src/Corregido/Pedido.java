@@ -19,6 +19,10 @@ public class Pedido {
         precios.add(precio);
     }
 
+    public String getCliente() {
+        return this.cliente;
+    }
+
     // REVISAR (1): calcula el total Y decide el descuento con un if/else
     // que crece cada vez que el restaurante inventa un tipo de cliente nuevo.
     public double calcularTotal() {
@@ -44,25 +48,25 @@ public class Pedido {
     //}
 
     // REVISAR (2): ...y también sabe imprimir recibos...
-    public void imprimirRecibo() {
-        ImpresoraTermica impresora = new ImpresoraTermica();
-        impresora.imprimir("Recibo de " + cliente + ": $" + calcularTotal());
-    }
+    //public void imprimirRecibo() {
+    //    ImpresoraTermica impresora = new ImpresoraTermica();
+    //    impresora.imprimir("Recibo de " + cliente + ": $" + calcularTotal());
+    //}
 
     // REVISAR (2): ...y también sabe enviar correos. Una sola clase, cuatro trabajos.
-    public void enviarCorreoConfirmacion() {
-        System.out.println("Enviando correo de confirmación a " + cliente + "...");
-    }
+    //public void enviarCorreoConfirmacion() {
+    //    System.out.println("Enviando correo de confirmación a " + cliente + "...");
+    //}
 
     public void setCliente(String cliente) { this.cliente = cliente; }
     public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
 }
 
-class ImpresoraTermica {
-    public void imprimir(String texto) {
-        System.out.println("[Impresora térmica] " + texto);
-    }
-}
+//class ImpresoraTermica {
+//    public void imprimir(String texto) {
+//        System.out.println("[Impresora térmica] " + texto);
+//    }
+//}
 
 // --- Métodos de pago ---
 

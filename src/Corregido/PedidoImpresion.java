@@ -10,9 +10,9 @@ public class PedidoImpresion {
 
     }
 
-    public void impresion() {
+    public void impresion(String recibo) {
 
-        impresora.imprimir(null);
+        impresora.imprimir(recibo);
 
     }
 
