@@ -1,5 +1,24 @@
 package Corregido;
 
+/** 
+ * Representa la entidad principal de un pedido. 
+ * 
+ * Problema que resuelve: 
+ * En la propuesta inicial, Pedido tenía varias responsabilidades que no le
+ * correspondían: calcular descuentos, guardar en la base de datos, imprimir 
+ * recibos y enviar correos. Además, conocía directamente cada tipo de cliente.
+ * 
+ * Solución:
+ * Pedido conserva únicamente la información y operaciones propias del pedido.
+ * El cálculo del descuento se delega a una estrategia Descuento, mientras que
+ * la persistencia, impresión y notificación se manejan desde clases separadas.
+ * 
+ * SOLID:
+ * - SRP: Pedido se concentra en administrar el pedido y calcular su subtotal.
+ * - OCP: se pueden agregar nuevas estrategias de descuento sin modificar Pedido.
+ * - DIP: Pedido depende de la abstracción Descuento y no de una implementación concreta.
+ */
+
 // ==========================================================
 // Sistema de gestión de pedidos de un restaurante (versión CON violaciones)
 // ==========================================================
@@ -10,147 +29,44 @@ import java.util.List;
 public class Pedido {
 
     private String cliente;
-    private String tipoCliente; // "REGULAR", "VIP", "EMPLEADO"
+    private Descuento descuento;
     private List<String> platos = new ArrayList<>();
     private List<Double> precios = new ArrayList<>();
+
+    Pedido(Descuento descuento) {
+
+        this.descuento = descuento;
+
+    }
 
     public void agregarPlato(String nombre, double precio) {
         platos.add(nombre);
         precios.add(precio);
     }
 
-    public String getCliente() {
-        return this.cliente;
-    }
+    public String getCliente() {return this.cliente;}
 
-    // REVISAR (1): calcula el total Y decide el descuento con un if/else
-    // que crece cada vez que el restaurante inventa un tipo de cliente nuevo.
+    public void setCliente(String cliente) { this.cliente = cliente; }
+    public void setDescuento(Descuento descuento) { this.descuento = descuento; }
+
+
     public double calcularTotal() {
         double subtotal = 0;
         for (double precio : precios) {
             subtotal += precio;
         }
 
-        if (tipoCliente.equals("REGULAR")) {
-            return subtotal;
-        } else if (tipoCliente.equals("VIP")) {
-            return subtotal * 0.9;
-        } else if (tipoCliente.equals("EMPLEADO")) {
-            return subtotal * 0.5;
-        }
-        return subtotal;
-    }
-
-    // REVISAR (2): Pedido también sabe persistir datos...
-    //public void guardarEnBaseDeDatos() {
-    //    System.out.println("Conectando a la BD...");
-    //    System.out.println("INSERT INTO pedidos VALUES (...)");
-    //}
-
-    // REVISAR (2): ...y también sabe imprimir recibos...
-    //public void imprimirRecibo() {
-    //    ImpresoraTermica impresora = new ImpresoraTermica();
-    //    impresora.imprimir("Recibo de " + cliente + ": $" + calcularTotal());
-    //}
-
-    // REVISAR (2): ...y también sabe enviar correos. Una sola clase, cuatro trabajos.
-    //public void enviarCorreoConfirmacion() {
-    //    System.out.println("Enviando correo de confirmación a " + cliente + "...");
-    //}
-
-    public void setCliente(String cliente) { this.cliente = cliente; }
-    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
-}
-
-//class ImpresoraTermica {
-//    public void imprimir(String texto) {
-//        System.out.println("[Impresora térmica] " + texto);
-//    }
-//}
-
-// --- Métodos de pago ---
-
-abstract class MetodoPago {
-    public abstract void cobrar(double monto);
-}
-
-class PagoTarjeta extends MetodoPago {
-    @Override
-    public void cobrar(double monto) {
-        System.out.println("Cobrando $" + monto + " con tarjeta.");
+        return descuento.aplicar(subtotal);
     }
 }
 
-class PagoEfectivo extends MetodoPago {
-    @Override
-    public void cobrar(double monto) {
-        System.out.println("Cobrando $" + monto + " en efectivo.");
-    }
-}
-
-// REVISAR (3): esta subclase no puede cumplir lo que promete la superclase.
-class PagoPuntosFidelidad extends MetodoPago {
-    private double puntosDisponibles = 20.0;
-
-    @Override
-    public void cobrar(double monto) {
-        if (monto > puntosDisponibles) {
-            throw new IllegalStateException("No hay suficientes puntos para cobrar este monto.");
-        }
-        System.out.println("Cobrando $" + monto + " con puntos de fidelidad.");
-    }
-}
-
-// --- Personal del restaurante ---
-
-// REVISAR (4): una sola interfaz para roles que no hacen lo mismo.
-interface Empleado {
-    void atenderMesa();
-    void cocinar();
-    void repartirPedido();
-    void cobrarEnCaja();
-}
-
-class Mesero implements Empleado {
-    @Override
-    public void atenderMesa() {
-        System.out.println("El mesero atiende la mesa.");
-    }
-
-    @Override
-    public void cocinar() {
-        throw new UnsupportedOperationException("Un mesero no cocina.");
-    }
-
-    @Override
-    public void repartirPedido() {
-        throw new UnsupportedOperationException("Un mesero no reparte a domicilio.");
-    }
-
-    @Override
-    public void cobrarEnCaja() {
-        throw new UnsupportedOperationException("Un mesero no cobra en caja.");
-    }
-}
-
-class Cocinero implements Empleado {
-    @Override
-    public void atenderMesa() {
-        throw new UnsupportedOperationException("Un cocinero no atiende mesas.");
-    }
-
-    @Override
-    public void cocinar() {
-        System.out.println("El cocinero prepara el plato.");
-    }
-
-    @Override
-    public void repartirPedido() {
-        throw new UnsupportedOperationException("Un cocinero no reparte pedidos.");
-    }
-
-    @Override
-    public void cobrarEnCaja() {
-        throw new UnsupportedOperationException("Un cocinero no cobra en caja.");
-    }
-}
+/**
+ * Punto de entrada de la aplicación.
+ *
+ * Coordina la creación y colaboración entre objetos sin concentrar la lógica
+ * de pedidos, descuentos, pagos, persistencia o notificaciones.
+ *
+ * Aplica:
+ * - SRP: la aplicación solo coordina el flujo principal.
+ * - DIP: utiliza abstracciones en lugar de depender directamente de detalles.
+ */

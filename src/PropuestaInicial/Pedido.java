@@ -21,6 +21,7 @@ public class Pedido {
 
     // REVISAR (1): calcula el total Y decide el descuento con un if/else
     // que crece cada vez que el restaurante inventa un tipo de cliente nuevo.
+    //! OCP
     public double calcularTotal() {
         double subtotal = 0;
         for (double precio : precios) {
@@ -38,6 +39,7 @@ public class Pedido {
     }
 
     // REVISAR (2): Pedido también sabe persistir datos...
+    //! SRP
     public void guardarEnBaseDeDatos() {
         System.out.println("Conectando a la BD...");
         System.out.println("INSERT INTO pedidos VALUES (...)");
